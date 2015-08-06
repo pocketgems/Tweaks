@@ -95,8 +95,9 @@
     }];
     [alertController addAction:cancelAction];
 
+    __weak typeof(self) weakSelf = self;
     UIAlertAction *resetAction = [UIAlertAction actionWithTitle:@"Reset" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-      [_store reset];
+      [weakSelf.store reset];
     }];
     [alertController addAction:resetAction];
 
