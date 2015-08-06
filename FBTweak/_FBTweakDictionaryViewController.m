@@ -92,9 +92,10 @@
 - (NSArray *)allTweakKeys
 {
   // Sort by visible name.
+  __weak typeof(self) weakSelf = self;
   return [[_tweak.possibleValues allKeys] sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-    id value1 = _tweak.possibleValues[obj1];
-    id value2 = _tweak.possibleValues[obj2];
+    id value1 = weakSelf.tweak.possibleValues[obj1];
+    id value2 = weakSelf.tweak.possibleValues[obj2];
     return [value1 compare:value2];
   }];
 }
