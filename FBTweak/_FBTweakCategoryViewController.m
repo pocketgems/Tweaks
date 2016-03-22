@@ -85,7 +85,7 @@
 
 - (void)_reset
 {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 8000
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
   if ([UIAlertController class] != nil) {
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Are you sure?"
                                                                              message:@"Are you sure you want to reset your tweaks? This cannot be undone."
@@ -114,7 +114,7 @@
                                           otherButtonTitles:@"Reset", nil];
     [alert show];
 #endif
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 8000
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
   }
 #endif
 }
