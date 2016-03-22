@@ -14,12 +14,12 @@
 #import "FBTweakStore.h"
 #import "FBTweakCategory.h"
 
+#if FB_TWEAK_ENABLED
+
 #import <libkern/OSAtomic.h>
 #import <mach-o/getsect.h>
 #import <mach-o/dyld.h>
 #import <dlfcn.h>
-
-#if FB_TWEAK_ENABLED
 
 extern NSString *_FBTweakIdentifier(fb_tweak_entry *entry)
 {
