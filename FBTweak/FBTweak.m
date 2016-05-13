@@ -84,8 +84,8 @@
   if (_currentValue != currentValue) {
     _currentValue = currentValue;
     [[NSUserDefaults standardUserDefaults] setObject:_currentValue forKey:_identifier];
-    
-    for (id<FBTweakObserver> observer in [_observers setRepresentation]) {
+
+    for (id<FBTweakObserver> observer in [_observers copy]) {
       [observer tweakDidChange:self];
     }
   }
