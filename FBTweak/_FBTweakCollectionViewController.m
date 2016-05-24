@@ -9,8 +9,11 @@
 
 #import "FBTweakCollection.h"
 #import "FBTweakCategory.h"
+#import "FBTweak.h"
 #import "_FBTweakCollectionViewController.h"
 #import "_FBTweakTableViewCell.h"
+#import "_FBTweakDictionaryViewController.h"
+#import "_FBTweakArrayViewController.h"
 
 @interface _FBTweakCollectionViewController () <UITableViewDelegate, UITableViewDataSource>
 @end
@@ -25,10 +28,7 @@
   if ((self = [super init])) {
     _tweakCategory = category;
     self.title = _tweakCategory.name;
-
-    _sortedCollections = [_tweakCategory.tweakCollections sortedArrayUsingComparator:^(FBTweakCollection *a, FBTweakCollection *b) {
-      return [a.name localizedStandardCompare:b.name];
-    }];
+    [self _reloadData];
   }
   
   return self;
@@ -60,6 +60,15 @@
   [super viewWillAppear:animated];
   
   [_tableView deselectRowAtIndexPath:_tableView.indexPathForSelectedRow animated:animated];
+  [self _reloadData];
+}
+
+- (void)_reloadData
+{
+  _sortedCollections = [_tweakCategory.tweakCollections sortedArrayUsingComparator:^(FBTweakCollection *a, FBTweakCollection *b) {
+    return [a.name localizedStandardCompare:b.name];
+  }];
+  [_tableView reloadData];
 }
 
 - (void)_done
@@ -75,15 +84,17 @@
   
   NSTimeInterval duration = [notification.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
   UIViewAnimationCurve curve = [notification.userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
-  
+
+  __weak typeof(self) weakSelf = self;
+  __weak typeof(_tableView) weakTableView = _tableView;
   void (^animations)() = ^{
-    UIEdgeInsets contentInset = _tableView.contentInset;
-    contentInset.bottom = (self.view.bounds.size.height - CGRectGetMinY(endFrame));
-    _tableView.contentInset = contentInset;
+    UIEdgeInsets contentInset = weakTableView.contentInset;
+    contentInset.bottom = (weakSelf.view.bounds.size.height - CGRectGetMinY(endFrame));
+    weakTableView.contentInset = contentInset;
     
-    UIEdgeInsets scrollIndicatorInsets = _tableView.scrollIndicatorInsets;
-    scrollIndicatorInsets.bottom = (self.view.bounds.size.height - CGRectGetMinY(endFrame));
-    _tableView.scrollIndicatorInsets = scrollIndicatorInsets;
+    UIEdgeInsets scrollIndicatorInsets = weakTableView.scrollIndicatorInsets;
+    scrollIndicatorInsets.bottom = (weakSelf.view.bounds.size.height - CGRectGetMinY(endFrame));
+    weakTableView.scrollIndicatorInsets = scrollIndicatorInsets;
   };
   
   UIViewAnimationOptions options = (curve << 16) | UIViewAnimationOptionBeginFromCurrentState;
@@ -121,6 +132,19 @@
   cell.tweak = tweak;
   
   return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  FBTweakCollection *collection = _sortedCollections[indexPath.section];
+  FBTweak *tweak = collection.tweaks[indexPath.row];
+  if ([tweak.possibleValues isKindOfClass:[NSDictionary class]]) {
+    _FBTweakDictionaryViewController *vc = [[_FBTweakDictionaryViewController alloc] initWithTweak:tweak];
+    [self.navigationController pushViewController:vc animated:YES];
+  } else if ([tweak.possibleValues isKindOfClass:[NSArray class]]) {
+    _FBTweakArrayViewController *vc = [[_FBTweakArrayViewController alloc] initWithTweak:tweak];
+    [self.navigationController pushViewController:vc animated:YES];
+  }
 }
 
 @end

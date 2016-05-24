@@ -85,12 +85,38 @@
 
 - (void)_reset
 {
-  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Are you sure?"
-                                                  message:@"Are you sure you want to reset your tweaks? This cannot be undone."
-                                                 delegate:self
-                                        cancelButtonTitle:@"Cancel"
-                                        otherButtonTitles:@"Reset", nil];
-  [alert show];
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+  if ([UIAlertController class] != nil) {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Are you sure?"
+                                                                             message:@"Are you sure you want to reset your tweaks? This cannot be undone."
+                                                                      preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+      // do nothing
+    }];
+    [alertController addAction:cancelAction];
+
+    __weak typeof(self) weakSelf = self;
+    UIAlertAction *resetAction = [UIAlertAction actionWithTitle:@"Reset" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+      [weakSelf.store reset];
+    }];
+    [alertController addAction:resetAction];
+
+    [self presentViewController:alertController animated:YES completion:NULL];
+  } else {
+#endif
+#if (!defined(__has_feature) || !__has_feature(attribute_availability_app_extension))
+    // This is iOS 7 or lower. We need to use UIAlertView, because UIAlertController is not available.
+    // UIAlertView, however, is not available in app-extensions, so to allow compilation, we conditionally compile this branch only when we're not an app-extension. UIAlertController is always available in app-extensions, so this is safe.
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Are you sure?"
+                                                    message:@"Are you sure you want to reset your tweaks? This cannot be undone."
+                                                   delegate:self
+                                          cancelButtonTitle:@"Cancel"
+                                          otherButtonTitles:@"Reset", nil];
+    [alert show];
+#endif
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
+  }
+#endif
 }
 
 - (void)_export
