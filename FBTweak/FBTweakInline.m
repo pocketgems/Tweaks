@@ -20,6 +20,7 @@
 #import <mach-o/getsect.h>
 #import <mach-o/dyld.h>
 #import <dlfcn.h>
+#import <UIKit/UIDevice.h>
 
 extern NSString *_FBTweakIdentifier(fb_tweak_entry *entry)
 {
