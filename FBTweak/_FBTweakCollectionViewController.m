@@ -76,7 +76,7 @@
   NSTimeInterval duration = [notification.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
   UIViewAnimationCurve curve = [notification.userInfo[UIKeyboardAnimationCurveUserInfoKey] integerValue];
   
-  void (^animations)() = ^{
+  void (^animations)(void) = ^{
     UIEdgeInsets contentInset = _tableView.contentInset;
     contentInset.bottom = (self.view.bounds.size.height - CGRectGetMinY(endFrame));
     _tableView.contentInset = contentInset;
