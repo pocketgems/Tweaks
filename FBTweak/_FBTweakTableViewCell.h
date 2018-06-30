@@ -7,14 +7,14 @@
  of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <UIKit/UIKit.h>
+#import "UIKitWrapper.h"
 
 @class FBTweak;
 
 /**
   @abstract A table cell to edit a tweak.
  */
-@interface _FBTweakTableViewCell : UITableViewCell
+@interface _FBTweakTableViewCell : UIK(UITableViewCell, NSObject)
 
 /**
   @abstract Create a tweak table cell.

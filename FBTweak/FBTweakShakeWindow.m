@@ -13,7 +13,9 @@
 #import "FBTweakViewController.h"
 
 // Minimum shake time required to present tweaks on device.
+#ifndef TARGET_OS_MAC
 static CFTimeInterval _FBTweakShakeWindowMinTimeInterval = 0.4;
+#endif
 
 @implementation FBTweakShakeWindow {
   BOOL _shaking;
@@ -22,7 +24,7 @@ static CFTimeInterval _FBTweakShakeWindowMinTimeInterval = 0.4;
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
-  if ((self = [super initWithFrame:frame])) {
+  if ((self = UIK([super initWithFrame:frame], [super init]))) {
     _FBTweakShakeWindowCommonInit(self);
   }
 
@@ -31,7 +33,7 @@ static CFTimeInterval _FBTweakShakeWindowMinTimeInterval = 0.4;
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-  if ((self = [super initWithCoder:coder])) {
+  if ((self = UIK([super initWithCoder:coder], [super init]))) {
     _FBTweakShakeWindowCommonInit(self);
   }
   return self;
@@ -39,16 +41,20 @@ static CFTimeInterval _FBTweakShakeWindowMinTimeInterval = 0.4;
 
 static void _FBTweakShakeWindowCommonInit(FBTweakShakeWindow *self)
 {
+#ifndef TARGET_OS_MAC
   // Maintain this state manually using notifications so Tweaks can be used in app extensions, where UIApplication is unavailable.
   self->_active = YES;
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationWillResignActiveWithNotification:) name:UIApplicationWillResignActiveNotification object:nil];
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_applicationDidBecomeActiveWithNotification:) name:UIApplicationDidBecomeActiveNotification object:nil];
+#endif
 }
 
 - (void)dealloc
 {
+#ifndef TARGET_OS_MAC
   [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationWillResignActiveNotification object:nil];
   [[NSNotificationCenter defaultCenter] removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
+#endif
 }
 
 - (void)_applicationWillResignActiveWithNotification:(NSNotification *)notification
@@ -63,13 +69,16 @@ static void _FBTweakShakeWindowCommonInit(FBTweakShakeWindow *self)
 
 - (void)tweakViewControllerPressedDone:(FBTweakViewController *)tweakViewController
 {
+#ifndef TARGET_OS_MAC
   [[NSNotificationCenter defaultCenter] postNotificationName:FBTweakShakeViewControllerDidDismissNotification object:tweakViewController];
   [tweakViewController.view endEditing:YES];
   [tweakViewController dismissViewControllerAnimated:YES completion:NULL];
+#endif
 }
 
 - (void)_presentTweaks
 {
+#ifndef TARGET_OS_MAC
   UIViewController *visibleViewController = self.rootViewController;
   while (visibleViewController.presentedViewController != nil) {
     visibleViewController = visibleViewController.presentedViewController;
@@ -82,11 +91,14 @@ static void _FBTweakShakeWindowCommonInit(FBTweakShakeWindow *self)
     viewController.tweaksDelegate = self;
     [visibleViewController presentViewController:viewController animated:YES completion:NULL];
   }
+#endif
 }
 
 - (BOOL)_shouldPresentTweaks
 {
-#if TARGET_IPHONE_SIMULATOR && FB_TWEAK_ENABLED
+#ifdef TARGET_OS_MAC
+    return NO;
+#elif TARGET_IPHONE_SIMULATOR && FB_TWEAK_ENABLED
   return YES;
 #elif FB_TWEAK_ENABLED
   return _shaking && _active;
@@ -95,6 +107,7 @@ static void _FBTweakShakeWindowCommonInit(FBTweakShakeWindow *self)
 #endif
 }
 
+#ifndef TARGET_OS_MAC
 - (void)motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event
 {
   if (motion == UIEventSubtypeMotionShake) {
@@ -115,5 +128,6 @@ static void _FBTweakShakeWindowCommonInit(FBTweakShakeWindow *self)
   }
   [super motionEnded:motion withEvent:event];
 }
+#endif
 
 @end

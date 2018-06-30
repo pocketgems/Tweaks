@@ -7,7 +7,7 @@
  of patent rights can be found in the PATENTS file in the same directory.
  */
 
-#import <UIKit/UIKit.h>
+#import "UIKitWrapper.h"
 
 /**
  @abstract A notification posted when the FBTweakViewController is dismissed 
@@ -51,7 +51,10 @@ extern NSString *const FBTweakShakeViewControllerDidDismissNotification;
 /**
   @abstract Responds to actions from the tweak view controller.
  */
-@protocol FBTweakViewControllerDelegate <UINavigationControllerDelegate>
+@protocol FBTweakViewControllerDelegate
+#ifndef TARGET_OS_MAC
+<UINavigationControllerDelegate>
+#endif
 @required
 
 /**

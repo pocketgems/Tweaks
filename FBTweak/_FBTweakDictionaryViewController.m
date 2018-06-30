@@ -10,7 +10,10 @@
 #import "_FBTweakDictionaryViewController.h"
 #import "FBTweak.h"
 
-@interface _FBTweakDictionaryViewController () <UITableViewDataSource, UITableViewDelegate>
+@interface _FBTweakDictionaryViewController ()
+#ifndef TARGET_OS_MAC
+<UITableViewDataSource, UITableViewDelegate>
+#endif
 
 @end
 
@@ -25,7 +28,9 @@
 
   if ((self = [super init])) {
     _tweak = tweak;
+#ifndef TARGET_OS_MAC
     self.title = _tweak.name;
+#endif
   }
 
   return self;
@@ -33,6 +38,7 @@
 
 - (void)viewDidLoad
 {
+#ifndef TARGET_OS_MAC
   [super viewDidLoad];
   
   _tableView = [[UITableView alloc] initWithFrame:self.view.bounds style:UITableViewStyleGrouped];
@@ -40,12 +46,15 @@
   _tableView.dataSource = self;
   _tableView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
   [self.view addSubview:_tableView];
+#endif
 }
 
 - (void)dealloc
 {
+#ifndef TARGET_OS_MAC
   _tableView.delegate = nil;
   _tableView.dataSource = nil;
+#endif
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -60,6 +69,9 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+#ifdef TARGET_OS_MAC
+  return nil;
+#else
   static NSString *_FBTweakDictionaryViewControllerCellIdentifier = @"_FBTweakDictionaryViewControllerCellIdentifier";
   UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:_FBTweakDictionaryViewControllerCellIdentifier];
   if (cell == nil) {
@@ -78,15 +90,18 @@
   }
   
   return cell;
+#endif
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+#ifndef TARGET_OS_MAC
   NSArray *allKeys = [self allTweakKeys];
   NSString *key = allKeys[indexPath.row];
   
   self.tweak.currentValue = key;
   [self.navigationController popViewControllerAnimated:YES];
+#endif
 }
 
 - (NSArray *)allTweakKeys
