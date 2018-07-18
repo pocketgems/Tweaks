@@ -6,7 +6,7 @@
  LICENSE file in the root directory of this source tree. An additional grant
  of patent rights can be found in the PATENTS file in the same directory.
  */
-
+#if TARGET_OS_IPHONE
 #import "FBTweakInlineInternal.h"
 
 /**
@@ -53,4 +53,8 @@
  */
 #define FBTweakAction(category_, collection_, name_, ...) _FBTweakAction(category_, collection_, name_, __VA_ARGS__)
 
+#else
 
+#define FBTweakValue(category_, collection_, name_, default_) default_
+
+#endif
