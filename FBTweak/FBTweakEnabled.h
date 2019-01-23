@@ -9,7 +9,7 @@
 
 #ifndef FB_TWEAK_ENABLED
 
-#if DEBUG && !defined(PGDROID)
+#if DEBUG && !defined(PGDROID) && !defined(TARGET_OS_OSX)
 #define FB_TWEAK_ENABLED 1
 #else
 #define FB_TWEAK_ENABLED 0
