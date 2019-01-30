@@ -104,10 +104,45 @@ extern NSString *_FBTweakIdentifier(fb_tweak_entry *entry);
 })())
 #define _FBTweakInline(category_, collection_, name_, ...) _FBTweakDispatch(_FBTweakInlineWithoutRange, _FBTweakInlineWithRange, _FBTweakInlineWithPossible, __VA_ARGS__)(category_, collection_, name_, __VA_ARGS__)
 
-#ifdef __cplusplus
-#define _FBTweakValueInternal(...) \
-((^{ static_assert(false, "C++ not supported at present. See https://github.com/facebook/Tweaks/issues/84."); nil; })())
-#else
+#if defined(__cplusplus)
+#define _FBTweakValueInternal(tweak_, category_, collection_, name_, default_) \
+((^{ \
+  /* returns a correctly typed version of the current tweak value */ \
+  FBTweakValue currentValue = tweak_.currentValue ?: tweak_.defaultValue; \
+  return _Generic(default_, \
+    float: [currentValue floatValue], \
+    const float: [currentValue floatValue], \
+    double: [currentValue doubleValue], \
+    const double: [currentValue doubleValue], \
+    short: [currentValue shortValue], \
+    const short: [currentValue shortValue], \
+    unsigned short: [currentValue unsignedShortValue], \
+    const unsigned short: [currentValue unsignedShortValue], \
+    int: [currentValue intValue], \
+    const int: [currentValue intValue], \
+    unsigned int: [currentValue unsignedIntValue], \
+    const unsigned int: [currentValue unsignedIntValue], \
+    long: [currentValue longValue], \
+    const long: [currentValue longValue], \
+    unsigned long: [currentValue unsignedLongValue], \
+    const unsigned long: [currentValue unsignedLongValue], \
+    long long: [currentValue longLongValue], \
+    const long long: [currentValue longLongValue], \
+    unsigned long long: [currentValue unsignedLongLongValue], \
+    const unsigned long long: [currentValue unsignedLongLongValue], \
+    BOOL: [currentValue boolValue], \
+    const BOOL: [currentValue boolValue], \
+    id: currentValue, \
+    const id: currentValue, \
+    /* assume char * as the default. */ \
+    /* constant strings are typed as char[N] */ \
+    /* and we can't enumerate all of those. */ \
+    /* luckily, we only need one fallback */ \
+    default: [currentValue isKindOfClass:[NSString class]] ? [currentValue UTF8String] : [[currentValue stringValue] UTF8String] \
+  ); \
+})())
+
+#else // __cplusplus
 #define _FBTweakValueInternal(tweak_, category_, collection_, name_, default_) \
 ((^{ \
   /* returns a correctly typed version of the current tweak value */ \
