@@ -10,9 +10,13 @@
 #import "FBTweakStore.h"
 #import "FBTweakCategory.h"
 #import "_FBTweakCategoryViewController.h"
+#if TARGET_OS_IPHONE
 #import <MessageUI/MessageUI.h>
 
 @interface _FBTweakCategoryViewController () <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, MFMailComposeViewControllerDelegate>
+#else
+@interface _FBTweakCategoryViewController () <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
+#endif
 @end
 
 @implementation _FBTweakCategoryViewController {
@@ -64,12 +68,14 @@
   self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Reset" style:UIBarButtonItemStylePlain target:self action:@selector(_reset)];
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(_done)];
   
+#if TARGET_OS_IPHONE
   if ([MFMailComposeViewController canSendMail]) {
     UIBarButtonItem *exportItem = [[UIBarButtonItem alloc] initWithTitle:@"Export" style:UIBarButtonItemStyleDone target:self action:@selector(_export)];
     UIBarButtonItem *flexibleSpaceItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
     
     _toolbar.items = @[flexibleSpaceItem, exportItem];
   }
+#endif
 }
 
 - (void)dealloc
@@ -121,21 +127,23 @@
 
 - (void)_export
 {
-  NSString *version = [[NSBundle mainBundle] objectForInfoDictionaryKey:(__bridge NSString *)kCFBundleVersionKey];
-  NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
-  NSString *fileName = [NSString stringWithFormat:@"tweaks_%@_%@.plist", appName, version];
-  
   NSMutableData *data = [NSMutableData data];
   NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
   archiver.outputFormat = NSPropertyListXMLFormat_v1_0;
   [archiver encodeRootObject:_store];
   [archiver finishEncoding];
   
+#if TARGET_OS_IPHONE
+  NSString *version = [[NSBundle mainBundle] objectForInfoDictionaryKey:(__bridge NSString *)kCFBundleVersionKey];
+  NSString *appName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleDisplayName"];
+  NSString *fileName = [NSString stringWithFormat:@"tweaks_%@_%@.plist", appName, version];
+    
   MFMailComposeViewController *mailComposeViewController = [[MFMailComposeViewController alloc] init];
   mailComposeViewController.mailComposeDelegate = self;
   mailComposeViewController.subject = [NSString stringWithFormat:@"%@ Tweaks (v%@)", appName, version];
   [mailComposeViewController addAttachmentData:data mimeType:@"plist" fileName:fileName];
   [self presentViewController:mailComposeViewController animated:YES completion:nil];
+#endif
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -184,9 +192,12 @@
   }
 }
 
+#if TARGET_OS_IPHONE
 - (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
 {
   [self dismissViewControllerAnimated:YES completion:nil];
 }
+#endif
+
 
 @end

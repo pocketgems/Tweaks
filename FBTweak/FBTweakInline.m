@@ -76,9 +76,11 @@ static FBTweak *_FBTweakCreateWithEntry(NSString *identifier, fb_tweak_entry *en
 
 + (void)load
 {
+#if !TARGET_OS_OSX
   if ([[[UIDevice currentDevice] systemVersion] floatValue] < 6.0) {
     return;
   }
+#endif
   static uint32_t _tweaksLoaded = 0;
   if (OSAtomicTestAndSetBarrier(1, &_tweaksLoaded)) {
     return;
