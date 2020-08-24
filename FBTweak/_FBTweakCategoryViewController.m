@@ -11,8 +11,9 @@
 #import "FBTweakCategory.h"
 #import "_FBTweakCategoryViewController.h"
 #import <MessageUI/MessageUI.h>
+#import "PEUIAlertView.h"
 
-@interface _FBTweakCategoryViewController () <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, MFMailComposeViewControllerDelegate>
+@interface _FBTweakCategoryViewController () <UITableViewDataSource, UITableViewDelegate, PEUIAlertViewDelegate, MFMailComposeViewControllerDelegate>
 @end
 
 @implementation _FBTweakCategoryViewController {
@@ -85,11 +86,11 @@
 
 - (void)_reset
 {
-  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Are you sure?"
-                                                  message:@"Are you sure you want to reset your tweaks? This cannot be undone."
-                                                 delegate:self
-                                        cancelButtonTitle:@"Cancel"
-                                        otherButtonTitles:@"Reset", nil];
+  PEUIAlertView *alert = [[PEUIAlertView alloc] initWithTitle:@"Are you sure?"
+                                                      message:@"Are you sure you want to reset your tweaks? This cannot be undone."
+                                                     delegate:self
+                                            cancelButtonTitle:@"Cancel"
+                                            otherButtonTitles:@"Reset", nil];
   [alert show];
 }
 
@@ -151,7 +152,7 @@
   [_delegate tweakCategoryViewController:self selectedCategory:category];
 }
 
-- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+- (void)alertView:(PEUIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
   if (buttonIndex != alertView.cancelButtonIndex) {
     [_store reset];
