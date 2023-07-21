@@ -10,7 +10,7 @@
 #ifndef FB_TWEAK_ENABLED
 
 #if DEBUG && !defined(PGDROID)
-#define FB_TWEAK_ENABLED 1
+#define FB_TWEAK_ENABLED 0
 #else
 #define FB_TWEAK_ENABLED 0
 #endif
