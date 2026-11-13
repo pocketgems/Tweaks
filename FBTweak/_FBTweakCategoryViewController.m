@@ -13,7 +13,11 @@
 #if TARGET_OS_IPHONE
 #import <MessageUI/MessageUI.h>
 
+#if !defined(PGDROID)
+@interface _FBTweakCategoryViewController () <UITableViewDataSource, UITableViewDelegate, MFMailComposeViewControllerDelegate>
+#else
 @interface _FBTweakCategoryViewController () <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate, MFMailComposeViewControllerDelegate>
+#endif
 #else
 @interface _FBTweakCategoryViewController () <UITableViewDataSource, UITableViewDelegate, UIAlertViewDelegate>
 #endif
@@ -91,37 +95,24 @@
 
 - (void)_reset
 {
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
-  if ([UIAlertController class] != nil) {
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Are you sure?"
-                                                                             message:@"Are you sure you want to reset your tweaks? This cannot be undone."
-                                                                      preferredStyle:UIAlertControllerStyleAlert];
-    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-      // do nothing
-    }];
-    [alertController addAction:cancelAction];
+#if TARGET_OS_IPHONE && !defined(PGDROID)
+  UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Are you sure?"
+                                                                           message:@"Are you sure you want to reset your tweaks? This cannot be undone."
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+  [alertController addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil]];
 
-    __weak typeof(self) weakSelf = self;
-    UIAlertAction *resetAction = [UIAlertAction actionWithTitle:@"Reset" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
-      [weakSelf.store reset];
-    }];
-    [alertController addAction:resetAction];
-
-    [self presentViewController:alertController animated:YES completion:NULL];
-  } else {
-#endif
-#if (!defined(__has_feature) || !__has_feature(attribute_availability_app_extension))
-    // This is iOS 7 or lower. We need to use UIAlertView, because UIAlertController is not available.
-    // UIAlertView, however, is not available in app-extensions, so to allow compilation, we conditionally compile this branch only when we're not an app-extension. UIAlertController is always available in app-extensions, so this is safe.
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Are you sure?"
-                                                    message:@"Are you sure you want to reset your tweaks? This cannot be undone."
-                                                   delegate:self
-                                          cancelButtonTitle:@"Cancel"
-                                          otherButtonTitles:@"Reset", nil];
-    [alert show];
-#endif
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= 80000
-  }
+  __weak typeof(self) weakSelf = self;
+  [alertController addAction:[UIAlertAction actionWithTitle:@"Reset" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+    [weakSelf.store reset];
+  }]];
+  [self presentViewController:alertController animated:YES completion:nil];
+#else
+  UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Are you sure?"
+                                                  message:@"Are you sure you want to reset your tweaks? This cannot be undone."
+                                                 delegate:self
+                                        cancelButtonTitle:@"Cancel"
+                                        otherButtonTitles:@"Reset", nil];
+  [alert show];
 #endif
 }
 
@@ -185,12 +176,14 @@
   [_delegate tweakCategoryViewController:self selectedCategory:category];
 }
 
+#if !TARGET_OS_IPHONE || defined(PGDROID)
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
   if (buttonIndex != alertView.cancelButtonIndex) {
     [_store reset];
   }
 }
+#endif
 
 #if TARGET_OS_IPHONE
 - (void)mailComposeController:(MFMailComposeViewController *)controller didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error
